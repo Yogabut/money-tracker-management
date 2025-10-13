@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { DateRange } from "react-day-picker";
 import { transactions, expenseCategories, paymentMethods, users } from "@/data/transactions";
+import { DateRangePicker } from "@/components/DateRangePicker";
+import { CategoryFilter } from "@/components/CategoryFilter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +14,8 @@ import { toast } from "sonner";
 
 export default function Expense() {
   const [showForm, setShowForm] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     category: '',
@@ -20,7 +25,24 @@ export default function Expense() {
     user: '',
   });
 
-  const expenseTransactions = transactions.filter(t => t.type === 'expense');
+  const expenseTransactions = useMemo(() => {
+    let filtered = transactions.filter(t => t.type === 'expense');
+
+    if (dateRange?.from) {
+      filtered = filtered.filter(t => {
+        const transactionDate = new Date(t.date);
+        const from = dateRange.from!;
+        const to = dateRange.to || from;
+        return transactionDate >= from && transactionDate <= to;
+      });
+    }
+
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(t => selectedCategories.includes(t.category));
+    }
+
+    return filtered;
+  }, [dateRange, selectedCategories]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -53,6 +75,14 @@ export default function Expense() {
 
   const totalExpense = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
 
+  const handleToggleCategory = (category: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -65,6 +95,19 @@ export default function Expense() {
           Add Expense
         </Button>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
+          <CategoryFilter
+            categories={expenseCategories}
+            selectedCategories={selectedCategories}
+            onToggleCategory={handleToggleCategory}
+            onClearAll={() => setSelectedCategories([])}
+          />
+        </CardContent>
+      </Card>
 
       {/* Summary Card */}
       <Card>
