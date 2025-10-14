@@ -195,10 +195,17 @@ export default function Assistant() {
                 <div
                   key={message.id}
                   className={cn(
-                    "flex",
+                    "flex gap-2",
                     message.sender === 'user' ? 'justify-end' : 'justify-start'
                   )}
                 >
+                  {message.sender === 'bot' && (
+                    <div className="flex-shrink-0">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                      </div>
+                    </div>
+                  )}
                   <div
                     className={cn(
                       "max-w-[80%] rounded-lg px-4 py-3",
@@ -207,14 +214,26 @@ export default function Assistant() {
                         : 'bg-muted'
                     )}
                   >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-semibold">
+                        {message.sender === 'user' ? 'You' : 'AI Assistant'}
+                      </span>
+                      <span className="text-xs opacity-70">
+                        {message.timestamp.toLocaleTimeString('id-ID', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </span>
+                    </div>
                     <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
-                    <span className="text-xs opacity-70 mt-1 block">
-                      {message.timestamp.toLocaleTimeString('id-ID', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </span>
                   </div>
+                  {message.sender === 'user' && (
+                    <div className="flex-shrink-0">
+                      <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                        <span className="text-xs font-semibold text-primary-foreground">U</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
