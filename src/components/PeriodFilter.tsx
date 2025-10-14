@@ -17,7 +17,7 @@ export function PeriodFilter({ period, onChange }: PeriodFilterProps) {
   ];
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap">
       {periods.map((p) => (
         <Button
           key={p.value}
@@ -25,7 +25,7 @@ export function PeriodFilter({ period, onChange }: PeriodFilterProps) {
           size="sm"
           onClick={() => onChange(p.value)}
           className={cn(
-            "transition-all",
+            "transition-all flex-1 min-w-[70px] sm:min-w-0 text-xs sm:text-sm",
             period === p.value && "shadow-sm"
           )}
         >
