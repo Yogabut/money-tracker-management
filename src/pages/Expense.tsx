@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { DateRange } from "react-day-picker";
-import { transactions, expenseCategories, paymentMethods, users } from "@/data/transactions";
+import { transactions, expenseCategories, paymentMethods } from "@/data/transactions";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +22,6 @@ export default function Expense() {
     description: '',
     amount: '',
     paymentMethod: '',
-    user: '',
   });
 
   const expenseTransactions = useMemo(() => {
@@ -55,7 +54,7 @@ export default function Expense() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.category || !formData.description || !formData.amount || !formData.paymentMethod || !formData.user) {
+    if (!formData.category || !formData.description || !formData.amount || !formData.paymentMethod) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -68,7 +67,6 @@ export default function Expense() {
       description: '',
       amount: '',
       paymentMethod: '',
-      user: '',
     });
     setShowForm(false);
   };
@@ -185,19 +183,6 @@ export default function Expense() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="user">User</Label>
-                  <Select value={formData.user} onValueChange={(value) => setFormData({ ...formData, user: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select user" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users.map(user => (
-                        <SelectItem key={user} value={user}>{user}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
               <div className="flex gap-2">
                 <Button type="submit">Add Expense</Button>
@@ -220,7 +205,6 @@ export default function Expense() {
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
-                <TableHead>User</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Payment Method</TableHead>
@@ -231,7 +215,6 @@ export default function Expense() {
               {expenseTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.user}</TableCell>
                   <TableCell>{transaction.category}</TableCell>
                   <TableCell>{transaction.description}</TableCell>
                   <TableCell>{transaction.payment_method}</TableCell>

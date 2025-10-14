@@ -1,6 +1,5 @@
 export interface Transaction {
   id: number;
-  user: string;
   date: string;
   type: 'income' | 'expense';
   category: string;
@@ -12,7 +11,6 @@ export interface Transaction {
 export const transactions: Transaction[] = [
   {
     id: 1,
-    user: 'Dad',
     date: '2025-10-01',
     type: 'income',
     category: 'Salary',
@@ -22,7 +20,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 2,
-    user: 'Mom',
     date: '2025-10-03',
     type: 'expense',
     category: 'Food',
@@ -32,7 +29,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 3,
-    user: 'Son',
     date: '2025-10-04',
     type: 'expense',
     category: 'Transport',
@@ -42,7 +38,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 4,
-    user: 'Dad',
     date: '2025-10-05',
     type: 'income',
     category: 'Freelance',
@@ -52,7 +47,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 5,
-    user: 'Mom',
     date: '2025-10-06',
     type: 'expense',
     category: 'Shopping',
@@ -62,7 +56,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 6,
-    user: 'Dad',
     date: '2025-10-07',
     type: 'expense',
     category: 'Bills',
@@ -72,7 +65,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 7,
-    user: 'Son',
     date: '2025-10-08',
     type: 'expense',
     category: 'Entertainment',
@@ -82,7 +74,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 8,
-    user: 'Mom',
     date: '2025-10-09',
     type: 'income',
     category: 'Business',
@@ -92,7 +83,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 9,
-    user: 'Dad',
     date: '2025-10-10',
     type: 'expense',
     category: 'Healthcare',
@@ -102,7 +92,6 @@ export const transactions: Transaction[] = [
   },
   {
     id: 10,
-    user: 'Son',
     date: '2025-10-11',
     type: 'expense',
     category: 'Education',
@@ -115,4 +104,3 @@ export const transactions: Transaction[] = [
 export const incomeCategories = ['Salary', 'Freelance', 'Business', 'Investment', 'Other'];
 export const expenseCategories = ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Healthcare', 'Education', 'Other'];
 export const paymentMethods = ['Cash', 'Bank Transfer', 'Credit Card', 'Debit Card', 'E-Wallet'];
-export const users = ['Dad', 'Mom', 'Son', 'Daughter'];

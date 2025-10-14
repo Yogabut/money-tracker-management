@@ -1,4 +1,4 @@
-import { LayoutDashboard, TrendingUp, TrendingDown, Receipt, Settings } from "lucide-react";
+import { LayoutDashboard, TrendingUp, TrendingDown, Receipt, Sparkles, Settings } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -17,6 +17,7 @@ const menuItems = [
   { title: "Income", url: "/income", icon: TrendingUp },
   { title: "Expense", url: "/expense", icon: TrendingDown },
   { title: "Transactions", url: "/transactions", icon: Receipt },
+  { title: "AI Assistant", url: "/assistant", icon: Sparkles },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

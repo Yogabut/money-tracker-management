@@ -3,7 +3,6 @@ import { Wallet, TrendingUp, TrendingDown, Calendar } from "lucide-react";
 import { KPICard } from "@/components/KPICard";
 import { PeriodFilter, Period } from "@/components/PeriodFilter";
 import { PredictiveAnalytics } from "@/components/PredictiveAnalytics";
-import { Chatbot } from "@/components/Chatbot";
 import { transactions } from "@/data/transactions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area, AreaChart } from "recharts";
@@ -55,15 +54,14 @@ export default function Dashboard() {
   const recentExpense = transactions.filter(t => t.type === 'expense').slice(0, 5);
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back! Here's your financial overview.</p>
-          </div>
-          <PeriodFilter period={period} onChange={setPeriod} />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back! Here's your financial overview.</p>
         </div>
+        <PeriodFilter period={period} onChange={setPeriod} />
+      </div>
 
         {/* KPI Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -227,7 +225,7 @@ export default function Dashboard() {
                 <div key={transaction.id} className="flex items-center justify-between p-3 rounded-lg bg-success/5 border border-success/20">
                   <div>
                     <p className="font-medium">{transaction.description}</p>
-                    <p className="text-sm text-muted-foreground">{transaction.category} • {transaction.user}</p>
+                    <p className="text-sm text-muted-foreground">{transaction.category}</p>
                   </div>
                   <p className="font-semibold text-success">{formatCurrency(transaction.amount)}</p>
                 </div>
@@ -249,7 +247,7 @@ export default function Dashboard() {
                 <div key={transaction.id} className="flex items-center justify-between p-3 rounded-lg bg-destructive/5 border border-destructive/20">
                   <div>
                     <p className="font-medium">{transaction.description}</p>
-                    <p className="text-sm text-muted-foreground">{transaction.category} • {transaction.user}</p>
+                    <p className="text-sm text-muted-foreground">{transaction.category}</p>
                   </div>
                   <p className="font-semibold text-destructive">{formatCurrency(transaction.amount)}</p>
                 </div>
@@ -259,8 +257,5 @@ export default function Dashboard() {
         </Card>
         </div>
       </div>
-      
-      <Chatbot />
-    </>
   );
 }

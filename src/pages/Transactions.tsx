@@ -29,7 +29,6 @@ export default function Transactions() {
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>User</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Payment Method</TableHead>
@@ -45,7 +44,6 @@ export default function Transactions() {
                       {transaction.type}
                     </Badge>
                   </TableCell>
-                  <TableCell>{transaction.user}</TableCell>
                   <TableCell>{transaction.category}</TableCell>
                   <TableCell>{transaction.description}</TableCell>
                   <TableCell>{transaction.payment_method}</TableCell>

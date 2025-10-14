@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Income from "./pages/Income";
 import Expense from "./pages/Expense";
 import Transactions from "./pages/Transactions";
+import Assistant from "./pages/Assistant";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/income" element={<Income />} />
             <Route path="/expense" element={<Expense />} />
             <Route path="/transactions" element={<Transactions />} />
+            <Route path="/assistant" element={<Assistant />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
