@@ -22,7 +22,7 @@ export function PredictiveAnalytics({ totalIncome, totalExpense }: PredictiveAna
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Savings Ratio</CardTitle>
           <Target className="h-4 w-4 text-primary" />
@@ -35,7 +35,7 @@ export function PredictiveAnalytics({ totalIncome, totalExpense }: PredictiveAna
         </CardContent>
       </Card>
 
-      <Card className="border-success/20 bg-gradient-to-br from-success/5 to-transparent">
+      <Card className="border-success/20 bg-gradient-to-br from-success/5 to-transparent hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Next Month Prediction</CardTitle>
           <TrendingUp className="h-4 w-4 text-success" />
@@ -50,7 +50,7 @@ export function PredictiveAnalytics({ totalIncome, totalExpense }: PredictiveAna
         </CardContent>
       </Card>
 
-      <Card className="border-chart-income/20 bg-gradient-to-br from-chart-income/5 to-transparent">
+      <Card className="border-chart-income/20 bg-gradient-to-br from-chart-income/5 to-transparent hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Income Forecast</CardTitle>
           <TrendingUp className="h-4 w-4 text-chart-income" />
@@ -65,7 +65,7 @@ export function PredictiveAnalytics({ totalIncome, totalExpense }: PredictiveAna
         </CardContent>
       </Card>
 
-      <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent">
+      <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Savings Potential</CardTitle>
           <AlertCircle className="h-4 w-4 text-amber-500" />
