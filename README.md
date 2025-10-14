@@ -58,33 +58,33 @@ The system is **not multi-user shared**, but instead designed for **personal or 
 /src
 ├── components
 │   ├── charts
-│   │   ├── IncomeExpenseChart.jsx
-│   │   ├── CategoryBarChart.jsx
-│   │   └── CategoryPieChart.jsx
+│   │   ├── IncomeExpenseChart.tsx
+│   │   ├── CategoryBarChart.tsx
+│   │   └── CategoryPieChart.tsx
 │   ├── forms
-│   │   ├── IncomeForm.jsx
-│   │   └── ExpenseForm.jsx
+│   │   ├── IncomeForm.tsx
+│   │   └── ExpenseForm.tsx
 │   ├── cards
-│   │   ├── DashboardCards.jsx
-│   │   ├── IncomeBox.jsx
-│   │   └── ExpenseBox.jsx
+│   │   ├── DashboardCards.tsx
+│   │   ├── IncomeBox.tsx
+│   │   └── ExpenseBox.tsx
 │   ├── tables
-│   │   └── TransactionsTable.jsx
-│   └── Chatbot.jsx
+│   │   └── TransactionsTable.tsx
+│   └── Chatbot.tsx
 ├── pages
 │   ├── Auth
-│   │   ├── Login.jsx
-│   │   └── Register.jsx
-│   ├── Dashboard.jsx
-│   ├── Income.jsx
-│   ├── Expense.jsx
-│   ├── Transactions.jsx
-│   ├── Reports.jsx
-│   └── Settings.jsx
+│   │   ├── Login.tsx
+│   │   └── Register.tsx
+│   ├── Dashboard.tsx
+│   ├── Income.tsx
+│   ├── Expense.tsx
+│   ├── Transactions.tsx
+│   ├── Reports.tsx
+│   └── Settings.tsx
 ├── data
-│   └── transactions.js
-├── App.jsx
-└── main.jsx
+│   └── transactions.ts
+├── App.tsx
+└── main.tsx
 ```
 
 ---
