@@ -55,30 +55,35 @@ The system is **not multi-user shared**, but instead designed for **personal or 
 ## 🗂️ Project Structure
 
 /src
-┣ components
-┃ ┣ DashboardCards.jsx
-┃ ┣ TransactionsTable.jsx
-┃ ┣ IncomeExpenseChart.jsx
-┃ ┣ CategoryBarChart.jsx
-┃ ┣ CategoryPieChart.jsx
-┃ ┣ IncomeBox.jsx
-┃ ┣ ExpenseBox.jsx
-┃ ┣ Chatbot.jsx
-┃ ┣ IncomeForm.jsx
-┃ ┗ ExpenseForm.jsx
-┣ pages
-┃ ┣ Login.jsx
-┃ ┣ Register.jsx
-┃ ┣ Dashboard.jsx
-┃ ┣ Income.jsx
-┃ ┣ Expense.jsx
-┃ ┣ Transactions.jsx
-┃ ┣ Reports.jsx
-┃ ┗ Settings.jsx
-┣ data
-┃ ┗ transactions.js
-┣ App.jsx
-┗ main.jsx
+ ┣ components
+ ┃ ┣ charts
+ ┃ ┃ ┣ IncomeExpenseChart.jsx
+ ┃ ┃ ┣ CategoryBarChart.jsx
+ ┃ ┃ ┗ CategoryPieChart.jsx
+ ┃ ┣ forms
+ ┃ ┃ ┣ IncomeForm.jsx
+ ┃ ┃ ┗ ExpenseForm.jsx
+ ┃ ┣ cards
+ ┃ ┃ ┣ DashboardCards.jsx
+ ┃ ┃ ┣ IncomeBox.jsx
+ ┃ ┃ ┗ ExpenseBox.jsx
+ ┃ ┣ tables
+ ┃ ┃ ┗ TransactionsTable.jsx
+ ┃ ┗ Chatbot.jsx
+ ┣ pages
+ ┃ ┣ Auth
+ ┃ ┃ ┣ Login.jsx
+ ┃ ┃ ┗ Register.jsx
+ ┃ ┣ Dashboard.jsx
+ ┃ ┣ Income.jsx
+ ┃ ┣ Expense.jsx
+ ┃ ┣ Transactions.jsx
+ ┃ ┣ Reports.jsx
+ ┃ ┗ Settings.jsx
+ ┣ data
+ ┃ ┗ transactions.js
+ ┣ App.jsx
+ ┗ main.jsx
 
 
 ---
