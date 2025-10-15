@@ -2,24 +2,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Settings, LogOut } from "lucide-react";
 
@@ -28,7 +12,7 @@ export function AppLayout() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  // Dummy user data - ganti dengan data user dari context/state management
+
   const user = {
     name: "John Doe",
     email: "john.doe@example.com",
@@ -43,13 +27,13 @@ export function AppLayout() {
     return () => clearInterval(interval);
   }, []);
 
-  const formattedDate = currentDate.toLocaleDateString('en-US', {
+  const formattedDate = currentDate.toLocaleDateString('en-ID', {
+    day : 'numeric',
     month: 'long',
     year: 'numeric'
   });
 
   const handleLogout = () => {
-    // Tambahkan logic logout di sini (clear token, etc)
     setShowLogoutDialog(false);
     navigate("/");
   };

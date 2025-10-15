@@ -49,8 +49,8 @@ export default function Register() {
         
         <div className="relative z-10 text-center space-y-8 max-w-md">
           <div className="inline-flex items-center justify-center">
-            <div className="h-20 w-20 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl">
-              <Wallet className="h-10 w-10" />
+            <div className="h-12 w-16">
+                <img src="./finance.png" alt=""/>
             </div>
           </div>
           
@@ -77,7 +77,7 @@ export default function Register() {
             <CardHeader className="space-y-1 px-0">
               <CardTitle className="text-3xl font-bold text-center">Create an account</CardTitle>
               <CardDescription className="text-base text-center">
-                Join your family's finance management
+                Join your finance management
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0">

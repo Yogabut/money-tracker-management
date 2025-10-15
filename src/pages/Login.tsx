@@ -33,10 +33,10 @@ export default function Login() {
         <div className="absolute top-20 right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
         
-        <div className="relative z-10 text-center space-y-8 max-w-md">
+        <div className="relative z-10 text-center space-y-7 max-w-md">
           <div className="inline-flex items-center justify-center">
-            <div className="h-20 w-20 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl">
-              <Wallet className="h-10 w-10" />
+            <div className="w-[110px]">
+              <img src="./finance.png" alt=""/>
             </div>
           </div>
           
@@ -61,8 +61,8 @@ export default function Login() {
             <Card className="w-full max-w-md  bg-background">
               <CardHeader className="space-y-1">
                 <div className="flex justify-center mb-4">
-                  <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-xl">FD</span>
+                  <div className="h-12 w-16">
+                      <img src="./finance.png" alt=""/>
                   </div>
                 </div>
                 <CardTitle className="text-2xl text-center">Welcome back</CardTitle>

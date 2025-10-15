@@ -3,7 +3,6 @@ import { Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { transactions } from "@/data/transactions";
 
@@ -18,7 +17,7 @@ export default function Assistant() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! I'm your personal finance assistant. Ask me anything about your finances!",
+      text: "Hello! I'm your personal finance assistant. I can analyze your transactions from January to October 2025. Ask me anything about your finances!",
       sender: 'bot',
       timestamp: new Date(),
     },
@@ -40,27 +39,64 @@ export default function Assistant() {
     }).format(amount);
   };
 
-  const calculateStats = () => {
-    const totalIncome = transactions
+  const calculateStats = (filterMonth?: number) => {
+    let filteredTransactions = transactions;
+    
+    // Filter by month if specified
+    if (filterMonth !== undefined) {
+      filteredTransactions = transactions.filter(t => {
+        const date = new Date(t.date);
+        return date.getMonth() === filterMonth;
+      });
+    }
+
+    const totalIncome = filteredTransactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
     
-    const totalExpense = transactions
+    const totalExpense = filteredTransactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
     
     const balance = totalIncome - totalExpense;
     const savingsRatio = totalIncome > 0 ? (balance / totalIncome) * 100 : 0;
 
-    const expensesByCategory = transactions
+    const expensesByCategory = filteredTransactions
       .filter(t => t.type === 'expense')
       .reduce((acc, t) => {
         acc[t.category] = (acc[t.category] || 0) + t.amount;
         return acc;
       }, {} as Record<string, number>);
 
-    const sortedCategories = Object.entries(expensesByCategory)
+    const incomeByCategory = filteredTransactions
+      .filter(t => t.type === 'income')
+      .reduce((acc, t) => {
+        acc[t.category] = (acc[t.category] || 0) + t.amount;
+        return acc;
+      }, {} as Record<string, number>);
+
+    const sortedExpenseCategories = Object.entries(expensesByCategory)
       .sort(([, a], [, b]) => b - a);
+
+    const sortedIncomeCategories = Object.entries(incomeByCategory)
+      .sort(([, a], [, b]) => b - a);
+
+    // Monthly breakdown
+    const monthlyData: Record<string, { income: number; expense: number }> = {};
+    filteredTransactions.forEach(t => {
+      const date = new Date(t.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { income: 0, expense: 0 };
+      }
+
+      if (t.type === 'income') {
+        monthlyData[monthKey].income += t.amount;
+      } else {
+        monthlyData[monthKey].expense += t.amount;
+      }
+    });
 
     return {
       totalIncome,
@@ -68,75 +104,169 @@ export default function Assistant() {
       balance,
       savingsRatio,
       expensesByCategory,
-      sortedCategories,
-      transactionCount: transactions.length,
+      incomeByCategory,
+      sortedExpenseCategories,
+      sortedIncomeCategories,
+      transactionCount: filteredTransactions.length,
+      monthlyData,
+      transactions: filteredTransactions,
     };
+  };
+
+  const getMonthNumber = (monthName: string): number | undefined => {
+    const months: Record<string, number> = {
+      'january': 0, 'januari': 0, 'jan': 0,
+      'february': 1, 'februari': 1, 'feb': 1,
+      'march': 2, 'maret': 2, 'mar': 2,
+      'april': 3, 'apr': 3,
+      'may': 4, 'mei': 4,
+      'june': 5, 'juni': 5, 'jun': 5,
+      'july': 6, 'juli': 6, 'jul': 6,
+      'august': 7, 'agustus': 7, 'aug': 7, 'agu': 7,
+      'september': 8, 'sep': 8,
+      'october': 9, 'oktober': 9, 'oct': 9, 'okt': 9,
+    };
+    return months[monthName.toLowerCase()];
   };
 
   const getDummyResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
-    const stats = calculateStats();
-
-    if (lowerMessage.includes('income')) {
-      const incomeTransactions = transactions.filter(t => t.type === 'income');
-      const incomeList = incomeTransactions
-        .map(t => `${t.category}: ${formatCurrency(t.amount)} (${t.description})`)
-        .join('\n');
-      return `Your total income is ${formatCurrency(stats.totalIncome)}.\n\nIncome breakdown:\n${incomeList}`;
+    
+    // Check if asking about specific month
+    let monthFilter: number | undefined;
+    const monthMatch = lowerMessage.match(/\b(january|januari|february|februari|march|maret|april|may|mei|june|juni|july|juli|august|agustus|september|october|oktober|jan|feb|mar|apr|jun|jul|aug|agu|sep|oct|okt)\b/i);
+    if (monthMatch) {
+      monthFilter = getMonthNumber(monthMatch[0]);
     }
 
-    if (lowerMessage.includes('expense') || lowerMessage.includes('spend')) {
-      if (lowerMessage.includes('category') || lowerMessage.includes('breakdown')) {
-        const categoryBreakdown = stats.sortedCategories
+    const stats = calculateStats(monthFilter);
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October'];
+    const periodText = monthFilter !== undefined ? ` for ${monthNames[monthFilter]} 2025` : ' (January - October 2025)';
+
+    // Income queries
+    if (lowerMessage.includes('income') || lowerMessage.includes('pendapatan')) {
+      if (lowerMessage.includes('highest') || lowerMessage.includes('terbesar')) {
+        const [category, amount] = stats.sortedIncomeCategories[0] || ['N/A', 0];
+        return `Your highest income source${periodText} is ${category} with ${formatCurrency(amount)}.`;
+      }
+      
+      if (lowerMessage.includes('category') || lowerMessage.includes('breakdown') || lowerMessage.includes('detail')) {
+        const incomeBreakdown = stats.sortedIncomeCategories
           .map(([cat, amount]) => {
-            const percentage = (amount / stats.totalExpense) * 100;
-            return `${cat}: ${formatCurrency(amount)} (${percentage.toFixed(1)}%)`;
+            const percentage = (amount / stats.totalIncome) * 100;
+            return `• ${cat}: ${formatCurrency(amount)} (${percentage.toFixed(1)}%)`;
           })
           .join('\n');
-        return `Your total expenses are ${formatCurrency(stats.totalExpense)}.\n\nExpense by category:\n${categoryBreakdown}`;
+        return `Your total income${periodText} is ${formatCurrency(stats.totalIncome)}.\n\nIncome breakdown:\n${incomeBreakdown}`;
       }
-      return `Your total expenses are ${formatCurrency(stats.totalExpense)}. Your highest spending category is ${stats.sortedCategories[0][0]} with ${formatCurrency(stats.sortedCategories[0][1])}.`;
+
+      return `Your total income${periodText} is ${formatCurrency(stats.totalIncome)}.`;
     }
 
-    if (lowerMessage.includes('balance')) {
-      return `Your current balance is ${formatCurrency(stats.balance)}.\n\nTotal Income: ${formatCurrency(stats.totalIncome)}\nTotal Expense: ${formatCurrency(stats.totalExpense)}\nSavings Ratio: ${stats.savingsRatio.toFixed(1)}%`;
+    // Expense queries
+    if (lowerMessage.includes('expense') || lowerMessage.includes('spend') || lowerMessage.includes('pengeluaran')) {
+      if (lowerMessage.includes('category') || lowerMessage.includes('breakdown') || lowerMessage.includes('detail')) {
+        const categoryBreakdown = stats.sortedExpenseCategories
+          .map(([cat, amount]) => {
+            const percentage = (amount / stats.totalExpense) * 100;
+            return `• ${cat}: ${formatCurrency(amount)} (${percentage.toFixed(1)}%)`;
+          })
+          .join('\n');
+        return `Your total expenses${periodText} are ${formatCurrency(stats.totalExpense)}.\n\nExpense by category:\n${categoryBreakdown}`;
+      }
+      
+      if (stats.sortedExpenseCategories.length > 0) {
+        return `Your total expenses${periodText} are ${formatCurrency(stats.totalExpense)}. Your highest spending category is ${stats.sortedExpenseCategories[0][0]} with ${formatCurrency(stats.sortedExpenseCategories[0][1])}.`;
+      }
+      
+      return `Your total expenses${periodText} are ${formatCurrency(stats.totalExpense)}.`;
     }
 
-    if (lowerMessage.includes('saving')) {
-      return `Your savings ratio is ${stats.savingsRatio.toFixed(1)}%. You're saving ${formatCurrency(stats.balance)} out of ${formatCurrency(stats.totalIncome)} income. ${stats.savingsRatio > 50 ? 'Excellent job!' : 'Consider reducing expenses to save more.'}`;
+    // Balance queries
+    if (lowerMessage.includes('balance') || lowerMessage.includes('saldo')) {
+      const advice = stats.balance > 0 
+        ? `Great job! You're managing your finances well.` 
+        : `You're spending more than earning. Consider reducing expenses.`;
+      return `Your balance${periodText} is ${formatCurrency(stats.balance)}.\n\n💰 Total Income: ${formatCurrency(stats.totalIncome)}\n💸 Total Expense: ${formatCurrency(stats.totalExpense)}\n📊 Savings Ratio: ${stats.savingsRatio.toFixed(1)}%\n\n${advice}`;
     }
 
-    if (lowerMessage.includes('highest') || lowerMessage.includes('most')) {
-      const [category, amount] = stats.sortedCategories[0];
-      const percentage = (amount / stats.totalExpense) * 100;
-      return `Your highest spending category is ${category} with ${formatCurrency(amount)}, which is ${percentage.toFixed(1)}% of your total expenses.`;
+    // Savings queries
+    if (lowerMessage.includes('saving') || lowerMessage.includes('tabungan')) {
+      const advice = stats.savingsRatio > 50 
+        ? 'Excellent job! You\'re saving more than half your income.' 
+        : stats.savingsRatio > 30 
+        ? 'Good job! Keep maintaining this savings rate.' 
+        : stats.savingsRatio > 10 
+        ? 'Consider reducing expenses to save more.' 
+        : 'Warning: Your savings rate is very low. Review your expenses.';
+      
+      return `Your savings ratio${periodText} is ${stats.savingsRatio.toFixed(1)}%.\n\nYou're saving ${formatCurrency(stats.balance)} out of ${formatCurrency(stats.totalIncome)} income.\n\n${advice}`;
     }
 
-    if (lowerMessage.includes('food')) {
-      const foodExpense = stats.expensesByCategory['Food'] || 0;
-      const percentage = foodExpense > 0 ? (foodExpense / stats.totalExpense) * 100 : 0;
-      return `You spent ${formatCurrency(foodExpense)} on Food. This is ${percentage.toFixed(1)}% of your total expenses.`;
+    // Highest/Most queries
+    if (lowerMessage.includes('highest') || lowerMessage.includes('most') || lowerMessage.includes('terbesar')) {
+      if (stats.sortedExpenseCategories.length > 0) {
+        const [category, amount] = stats.sortedExpenseCategories[0];
+        const percentage = (amount / stats.totalExpense) * 100;
+        return `Your highest spending category${periodText} is ${category} with ${formatCurrency(amount)}, which is ${percentage.toFixed(1)}% of your total expenses.`;
+      }
     }
 
-    if (lowerMessage.includes('transport')) {
-      const transportExpense = stats.expensesByCategory['Transport'] || 0;
-      const percentage = transportExpense > 0 ? (transportExpense / stats.totalExpense) * 100 : 0;
-      return `Your Transport expenses are ${formatCurrency(transportExpense)}, which is ${percentage.toFixed(1)}% of total expenses.`;
+    // Specific category queries
+    const categoryMatch = lowerMessage.match(/\b(food|transport|shopping|bills|entertainment|healthcare|education|salary|freelance|business|investment)\b/i);
+    if (categoryMatch) {
+      const category = categoryMatch[0].charAt(0).toUpperCase() + categoryMatch[0].slice(1);
+      const expenseAmount = stats.expensesByCategory[category] || 0;
+      const incomeAmount = stats.incomeByCategory[category] || 0;
+      
+      if (expenseAmount > 0) {
+        const percentage = (expenseAmount / stats.totalExpense) * 100;
+        return `You spent ${formatCurrency(expenseAmount)} on ${category}${periodText}. This is ${percentage.toFixed(1)}% of your total expenses.`;
+      } else if (incomeAmount > 0) {
+        const percentage = (incomeAmount / stats.totalIncome) * 100;
+        return `You earned ${formatCurrency(incomeAmount)} from ${category}${periodText}. This is ${percentage.toFixed(1)}% of your total income.`;
+      } else {
+        return `You have no transactions in the ${category} category${periodText}.`;
+      }
     }
 
-    if (lowerMessage.includes('transaction') || lowerMessage.includes('recent')) {
-      const recent = transactions.slice(-5).reverse();
+    // Recent transactions
+    if (lowerMessage.includes('transaction') || lowerMessage.includes('recent') || lowerMessage.includes('latest') || lowerMessage.includes('terakhir')) {
+      const recent = stats.transactions
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5);
       const list = recent
-        .map(t => `${t.date} - ${t.type === 'income' ? '💰' : '💸'} ${t.category}: ${formatCurrency(t.amount)}`)
+        .map(t => `${t.date} - ${t.type === 'income' ? '💰' : '💸'} ${t.category}: ${formatCurrency(t.amount)} (${t.description})`)
         .join('\n');
-      return `Your 5 most recent transactions:\n\n${list}`;
+      return `Your 5 most recent transactions${periodText}:\n\n${list}`;
     }
 
-    if (lowerMessage.includes('summary') || lowerMessage.includes('overview')) {
-      return `Financial Summary:\n\n💰 Total Income: ${formatCurrency(stats.totalIncome)}\n💸 Total Expense: ${formatCurrency(stats.totalExpense)}\n💵 Balance: ${formatCurrency(stats.balance)}\n📊 Savings Ratio: ${stats.savingsRatio.toFixed(1)}%\n📈 Total Transactions: ${stats.transactionCount}\n\nTop Expense: ${stats.sortedCategories[0][0]} (${formatCurrency(stats.sortedCategories[0][1])})`;
+    // Monthly comparison
+    if (lowerMessage.includes('compare') || lowerMessage.includes('comparison') || lowerMessage.includes('month')) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+      const monthlyBreakdown = Object.entries(stats.monthlyData)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([month, data]) => {
+          const [, monthNum] = month.split('-');
+          const monthName = months[parseInt(monthNum) - 1];
+          const balance = data.income - data.expense;
+          return `${monthName}: Income ${formatCurrency(data.income)}, Expense ${formatCurrency(data.expense)}, Balance ${formatCurrency(balance)}`;
+        })
+        .join('\n');
+      
+      return `Monthly breakdown:\n\n${monthlyBreakdown}`;
     }
 
-    return "I can help you with questions about your income, expenses, balance, savings, categories, and recent transactions. Try asking:\n- What's my income?\n- Show my expense breakdown\n- What's my balance?\n- What's my highest spending category?\n- Show recent transactions\n- Give me a summary";
+    // Summary
+    if (lowerMessage.includes('summary') || lowerMessage.includes('overview') || lowerMessage.includes('ringkasan')) {
+      const topExpense = stats.sortedExpenseCategories[0] || ['N/A', 0];
+      const topIncome = stats.sortedIncomeCategories[0] || ['N/A', 0];
+      
+      return `Financial Summary${periodText}:\n\n💰 Total Income: ${formatCurrency(stats.totalIncome)}\n💸 Total Expense: ${formatCurrency(stats.totalExpense)}\n💵 Balance: ${formatCurrency(stats.balance)}\n📊 Savings Ratio: ${stats.savingsRatio.toFixed(1)}%\n📈 Total Transactions: ${stats.transactionCount}\n\n🔝 Top Income: ${topIncome[0]} (${formatCurrency(topIncome[1])})\n🔝 Top Expense: ${topExpense[0]} (${formatCurrency(topExpense[1])})`;
+    }
+
+    // Help/Default response
+    return "I can help you with questions about your finances (Jan-Oct 2025). Try asking:\n\n• What's my income?\n• Show my expense breakdown\n• What's my balance?\n• What's my highest spending category?\n• Show recent transactions\n• Give me a summary\n• Compare monthly data\n• How much did I spend on [category]?\n• What's my income in [month]?";
   };
 
   const handleSend = () => {
@@ -177,7 +307,7 @@ export default function Assistant() {
         </div>
         <div>
           <h1 className="text-3xl font-bold">AI Assistant</h1>
-          <p className="text-muted-foreground">Your personal finance advisor</p>
+          <p className="text-muted-foreground">Your personal finance advisor (Jan-Oct 2025)</p>
         </div>
       </div>
 

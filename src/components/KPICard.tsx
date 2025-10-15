@@ -33,7 +33,7 @@ export function KPICard({ title, value, change, changeType, icon: Icon, variant 
     : "text-muted-foreground";
 
   return (
-    <Card className={cn("shadow-lg", variantStyles[variant])}>
+    <Card className={cn("shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300", variantStyles[variant])}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className={cn("h-4 w-4", iconStyles[variant])} />
