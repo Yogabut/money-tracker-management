@@ -32,8 +32,8 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <div className="flex items-center gap-2 px-4 py-6">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">FD</span>
+          <div className="h-12 w-12 rounded-lg flex items-center justify-center">
+            <img src="./finance.png" alt="" />
           </div>
           {!isCollapsed && (
             <div>
