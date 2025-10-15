@@ -1,35 +1,94 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import KPISection from "@/components/Dashboard/KPI"
 import ChartSection from "@/components/Dashboard/Chart";
 import RecentTransactions from "@/components/Dashboard/RecentTransactions";
 import HeaderSection from "@/components/Dashboard/Header";
 import { PredictiveAnalytics } from "@/components/PredictiveAnalytics";
+import { PeriodFilter, Period } from "@/components/PeriodFilter";
 import { transactions } from "@/data/transactions";
 
 export default function Dashboard() {
+  const [period, setPeriod] = useState<Period>('monthly');
+
+  // Filter transactions based on selected period
+  const filteredTransactions = useMemo(() => {
+    const now = new Date();
+    
+    return transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      
+      switch (period) {
+        case 'daily':
+          return (
+            transactionDate.getDate() === now.getDate() &&
+            transactionDate.getMonth() === now.getMonth() &&
+            transactionDate.getFullYear() === now.getFullYear()
+          );
+          
+        case 'weekly':
+          { const weekAgo = new Date(now);
+          weekAgo.setDate(now.getDate() - 7);
+          return transactionDate >= weekAgo && transactionDate <= now; }
+          
+        case 'monthly':
+          return (
+            transactionDate.getMonth() === now.getMonth() &&
+            transactionDate.getFullYear() === now.getFullYear()
+          );
+          
+        case 'yearly':
+          return transactionDate.getFullYear() === now.getFullYear();
+          
+        default:
+          return true;
+      }
+    });
+  }, [period]);
+
+  // Calculate stats from filtered transactions
   const stats = useMemo(() => {
-    const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const income = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const expense = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const balance = income - expense;
 
     return { income, expense, balance };
-  }, []);
+  }, [filteredTransactions]);
 
   return (
     <div className="space-y-6">
       <HeaderSection />
 
+      {/* Period Filter */}
+      <div className="flex justify-end">
+        <PeriodFilter period={period} onChange={setPeriod} />
+      </div>
+
       {/* KPI Cards */}
-      <KPISection />
+      <KPISection 
+        income={stats.income} 
+        expense={stats.expense} 
+        balance={stats.balance}
+        transactions={filteredTransactions}
+        period={period}
+        allTransactions={transactions} // Pass semua transaksi untuk perbandingan
+      />
 
       {/* Predictive Analytics */}
-      <PredictiveAnalytics totalIncome={stats.income} totalExpense={stats.expense} />
+      <PredictiveAnalytics 
+        totalIncome={stats.income} 
+        totalExpense={stats.expense} 
+      />
 
       {/* Charts Grid */}
-      <ChartSection />
+      <ChartSection 
+        transactions={filteredTransactions}
+        period={period}
+      />
 
       {/* Recent Transactions */}
-      <RecentTransactions />
+      <RecentTransactions 
+        transactions={filteredTransactions}
+      />
     </div>
   );
 }

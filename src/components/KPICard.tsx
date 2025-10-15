@@ -1,47 +1,50 @@
-import { Card, CardContent } from "@/components/ui/card";
+// src/components/KPICard.tsx
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface KPICardProps {
   title: string;
-  value: string;
+  value: string | number;
   change?: string;
+  changeType?: "positive" | "negative"; // Tambahkan prop baru
   icon: LucideIcon;
-  variant?: 'default' | 'success' | 'destructive';
+  variant?: "default" | "success" | "destructive";
 }
 
-export function KPICard({ title, value, change, icon: Icon, variant = 'default' }: KPICardProps) {
+export function KPICard({ title, value, change, changeType, icon: Icon, variant = "default" }: KPICardProps) {
+  const variantStyles = {
+    default: "border-primary/20",
+    success: "border-green-500/20",
+    destructive: "border-red-500/20",
+  };
+
+  const iconStyles = {
+    default: "text-primary",
+    success: "text-green-600",
+    destructive: "text-red-600",
+  };
+
+  // Tentukan warna change berdasarkan changeType
+  const changeColor = changeType === "positive" 
+    ? "text-green-600" 
+    : changeType === "negative" 
+    ? "text-red-600" 
+    : "text-muted-foreground";
+
   return (
-    <Card className="overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-            {change && (
-              <p className={cn(
-                "text-xs font-medium",
-                variant === 'success' && "text-success",
-                variant === 'destructive' && "text-destructive"
-              )}>
-                {change}
-              </p>
-            )}
-          </div>
-          <div className={cn(
-            "rounded-lg p-3",
-            variant === 'success' && "bg-success/10",
-            variant === 'destructive' && "bg-destructive/10",
-            variant === 'default' && "bg-primary/10"
-          )}>
-            <Icon className={cn(
-              "h-5 w-5",
-              variant === 'success' && "text-success",
-              variant === 'destructive' && "text-destructive",
-              variant === 'default' && "text-primary"
-            )} />
-          </div>
-        </div>
+    <Card className={cn("shadow-lg", variantStyles[variant])}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <Icon className={cn("h-4 w-4", iconStyles[variant])} />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        {change && (
+          <p className={cn("text-xs mt-1 font-medium", changeColor)}>
+            {change}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
