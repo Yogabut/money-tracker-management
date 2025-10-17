@@ -45,13 +45,13 @@ export default function Login() {
               Money Tracker
             </h1>
             <p className="text-xl text-primary-foreground/80 leading-relaxed">
-              Kelola keuangan<br />dengan lebih mudah dan terorganisir
+              Manage your finances<br />more easily and in a more organized manner
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-sm text-primary-foreground/60">
             <Sparkles className="h-4 w-4" />
-            <span>Trusted by 10,000+ families</span>
+            <span>Trusted by 10,000+ users</span>
           </div>
         </div>
       </div>

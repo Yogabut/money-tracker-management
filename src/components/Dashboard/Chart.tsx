@@ -5,11 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area, AreaChart } from "recharts";
 
 interface ChartSectionProps {
-  transactions: Transaction[];
-  period: Period;
+    transactions: Transaction[];
+    period: Period;
 }
 
-export default function ChartSection({ transactions, period }: ChartSectionProps) {
+export default function ChartSection(
+    { 
+        transactions, 
+        period 
+    }: ChartSectionProps) {
 
     const stats = useMemo(() => {
         const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);

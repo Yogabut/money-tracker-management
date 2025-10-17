@@ -47,10 +47,10 @@ export default function Register() {
         <div className="absolute top-20 right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
         
-        <div className="relative z-10 text-center space-y-8 max-w-md">
+        <div className="relative z-10 text-center space-y-7 max-w-md">
           <div className="inline-flex items-center justify-center">
-            <div className="h-12 w-16">
-                <img src="./finance.png" alt=""/>
+            <div className="w-[110px]">
+              <img src="./finance.png" alt=""/>
             </div>
           </div>
           
@@ -59,13 +59,13 @@ export default function Register() {
               Money Tracker
             </h1>
             <p className="text-xl text-primary-foreground/80 leading-relaxed">
-              Kelola keuangan<br />dengan lebih mudah dan terorganisir
+              Manage your finances<br />more easily and in a more organized manner
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-sm text-primary-foreground/60">
             <Sparkles className="h-4 w-4" />
-            <span>Trusted by 10,000+ families</span>
+            <span>Trusted by 10,000+ users</span>
           </div>
         </div>
       </div>

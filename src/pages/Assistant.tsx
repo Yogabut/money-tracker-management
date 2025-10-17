@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -360,7 +360,7 @@ export default function Assistant() {
                   {message.sender === 'user' && (
                     <div className="flex-shrink-0">
                       <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                        <span className="text-xs font-semibold text-primary-foreground">U</span>
+                        <span className="text-xs font-semibold text-primary-foreground"><User className="opacity-70"/></span>
                       </div>
                     </div>
                   )}
