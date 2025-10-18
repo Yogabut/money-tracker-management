@@ -85,7 +85,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
         <div>
         <div className="grid gap-4 md:grid-cols-2">
             {/* INCOME */}
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-green-600" />
@@ -130,7 +130,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
             </Card>
 
             {/* EXPENSE */}
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-red-600" />
