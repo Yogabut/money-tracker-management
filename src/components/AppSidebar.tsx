@@ -1,8 +1,10 @@
-import { LayoutDashboard, TrendingUp, TrendingDown, Receipt, Sparkles, Settings } from "lucide-react";
+import { LayoutDashboard, TrendingUp, TrendingDown, Receipt, Sparkles, Settings, LogOut } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -24,6 +26,7 @@ const menuItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
+  const { signOut, user } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
   const isCollapsed = state === "collapsed";
@@ -66,6 +69,21 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="px-3 py-2 text-sm text-muted-foreground truncate">
+              {user?.email}
+            </div>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={signOut}>
+              <LogOut className="h-4 w-4" />
+              {!isCollapsed && <span>Logout</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

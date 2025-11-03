@@ -5,10 +5,11 @@ import RecentTransactions from "@/components/Dashboard/RecentTransactions";
 import HeaderSection from "@/components/Dashboard/Header";
 import { PredictiveAnalytics } from "@/components/PredictiveAnalytics";
 import { PeriodFilter, Period } from "@/components/PeriodFilter";
-import { transactions } from "@/data/transactions";
+import { useTransactions } from "@/hooks/useTransactions";
 
 export default function Dashboard() {
   const [period, setPeriod] = useState<Period>('monthly');
+  const { transactions, isLoading } = useTransactions();
 
   // Filter transactions based on selected period
   const filteredTransactions = useMemo(() => {
@@ -43,7 +44,7 @@ export default function Dashboard() {
           return true;
       }
     });
-  }, [period]);
+  }, [period, transactions]);
 
   // Calculate stats from filtered transactions
   const stats = useMemo(() => {
@@ -53,6 +54,14 @@ export default function Dashboard() {
 
     return { income, expense, balance };
   }, [filteredTransactions]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

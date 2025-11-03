@@ -1,28 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { Wallet, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Sparkles } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { signIn, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast.error("Please fill in all fields");
       return;
     }
 
-    // Dummy login - just navigate to dashboard
-    toast.success("Login successful!");
-    navigate("/dashboard");
+    setLoading(true);
+    await signIn(email, password);
+    setLoading(false);
   };
 
   return (
@@ -94,8 +101,8 @@ export default function Login() {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Sign In
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
                 <div className="mt-4 text-center text-sm">

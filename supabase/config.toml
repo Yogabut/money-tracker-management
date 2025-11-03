@@ -1,1 +1,4 @@
 project_id = "etgwkhrjtoubpukclmzp"
+
+[functions.chat-finance]
+verify_jwt = true

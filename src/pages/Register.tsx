@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Wallet, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Sparkles } from "lucide-react";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { signUp, user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -16,7 +19,13 @@ export default function Register() {
     verifyPassword: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.fullName || !formData.email || !formData.password || !formData.verifyPassword) {
@@ -34,9 +43,13 @@ export default function Register() {
       return;
     }
 
-    // Dummy registration
-    toast.success("Registration successful! Please login.");
-    navigate("/");
+    setLoading(true);
+    const { error } = await signUp(formData.email, formData.password, formData.fullName);
+    setLoading(false);
+
+    if (!error) {
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -129,8 +142,8 @@ export default function Register() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full h-11 text-base">
-                  Create Account
+                <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
+                  {loading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
               
