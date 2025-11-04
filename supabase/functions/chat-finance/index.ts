@@ -43,7 +43,6 @@ Keep responses concise and actionable. Format numbers in Indonesian Rupiah (IDR)
           { role: "system", content: systemPrompt },
           ...messages,
         ],
-        stream: true,
       }),
     });
 
@@ -76,8 +75,9 @@ Keep responses concise and actionable. Format numbers in Indonesian Rupiah (IDR)
       });
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    const data = await response.json();
+    return new Response(JSON.stringify({ response: data.choices[0].message.content }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Chat error:", error);

@@ -148,12 +148,20 @@ export default function Assistant() {
 
   const callAI = async (userMessage: string) => {
     try {
-      const context = prepareTransactionContext();
-      
+      const conversationMessages = messages.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
+
+      conversationMessages.push({
+        role: 'user',
+        content: userMessage
+      });
+
       const { data, error } = await supabase.functions.invoke('chat-finance', {
         body: {
-          message: userMessage,
-          context: context
+          messages: conversationMessages,
+          transactions: transactions
         }
       });
 
