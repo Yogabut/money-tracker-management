@@ -7,6 +7,25 @@ import { cn } from "@/lib/utils";
 import { useTransactions } from "@/hooks/useTransactions";
 import { supabase } from "@/integrations/supabase/client";
 
+const MarkdownText = ({ text }: { text: string }) => {
+  const renderText = (content: string) => {
+    const parts = content.split(/(\*\*.*?\*\*)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index}>{part.slice(2, -2)}</strong>;
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
+  return (
+    <div className="text-sm leading-relaxed whitespace-pre-line">
+      {renderText(text)}
+    </div>
+  );
+};
+
 interface Message {
   id: number;
   text: string;
@@ -422,7 +441,7 @@ export default function Assistant() {
                         })}
                       </span>
                     </div>
-                    <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
+                    <MarkdownText text={message.text} />
                   </div>
                   {message.sender === 'user' && (
                     <div className="flex-shrink-0">
