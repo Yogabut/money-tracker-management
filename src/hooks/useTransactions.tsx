@@ -27,7 +27,7 @@ export function useTransactions() {
       
       const { data, error } = await supabase
         .from('transactions')
-        .select('*')
+        .select('id, date, type, category, description, amount, payment_method, user_id, created_at, updated_at')
         .eq('user_id', user.id)
         .order('date', { ascending: false });
 
@@ -37,14 +37,14 @@ export function useTransactions() {
     enabled: !!user,
   });
 
-  const addTransaction = useMutation({
+  const addTransactionMutation = useMutation({
     mutationFn: async (transaction: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
         .from('transactions')
         .insert([{ ...transaction, user_id: user.id }])
-        .select()
+        .select('id, date, type, category, description, amount, payment_method, user_id, created_at, updated_at')
         .single();
 
       if (error) throw error;
@@ -59,13 +59,13 @@ export function useTransactions() {
     },
   });
 
-  const updateTransaction = useMutation({
+  const updateTransactionMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Transaction> & { id: string }) => {
       const { data, error } = await supabase
         .from('transactions')
         .update(updates)
         .eq('id', id)
-        .select()
+        .select('id, date, type, category, description, amount, payment_method, user_id, created_at, updated_at')
         .single();
 
       if (error) throw error;
@@ -80,7 +80,7 @@ export function useTransactions() {
     },
   });
 
-  const deleteTransaction = useMutation({
+  const deleteTransactionMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('transactions')
@@ -101,11 +101,11 @@ export function useTransactions() {
   return {
     transactions,
     isLoading,
-    addTransaction: addTransaction.mutate,
-    updateTransaction: updateTransaction.mutate,
-    deleteTransaction: deleteTransaction.mutate,
-    isAdding: addTransaction.isPending,
-    isUpdating: updateTransaction.isPending,
-    isDeleting: deleteTransaction.isPending,
+    addTransaction: addTransactionMutation.mutateAsync,
+    updateTransaction: updateTransactionMutation.mutateAsync,
+    deleteTransaction: deleteTransactionMutation.mutateAsync,
+    isAdding: addTransactionMutation.isPending,
+    isUpdating: updateTransactionMutation.isPending,
+    isDeleting: deleteTransactionMutation.isPending,
   };
 }

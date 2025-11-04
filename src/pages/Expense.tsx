@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo } from "react";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/DateRangePicker";
@@ -7,13 +8,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTransactions } from "@/hooks/useTransactions";
 import { TransactionDialog } from "@/components/TransactionDialog";
 import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const expenseCategories = ["Food", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Education", "Other"];
 
 export default function Expense() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const { transactions, isLoading } = useTransactions();
+  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
+  const { transactions, isLoading, deleteTransaction } = useTransactions();
 
   const expenseTransactions = useMemo(() => {
     let filtered = transactions.filter(t => t.type === 'expense');
@@ -32,7 +49,7 @@ export default function Expense() {
     }
 
     return filtered;
-  }, [dateRange, selectedCategories]);
+  }, [transactions, dateRange, selectedCategories]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -52,6 +69,54 @@ export default function Expense() {
     );
   };
 
+  const handleEditClick = (transaction: any) => {
+    console.log('=== EDIT CLICKED (EXPENSE) ===');
+    console.log('Full transaction object:', JSON.stringify(transaction, null, 2));
+    console.log('Transaction ID:', transaction.id);
+    console.log('All keys:', Object.keys(transaction));
+    
+    if (transaction && transaction.id) {
+      setEditingTransaction(transaction);
+    } else {
+      console.error('❌ Transaction ID is missing!');
+      toast.error('Cannot edit: Transaction ID is missing');
+    }
+  };
+
+  const handleDeleteClick = (transaction: any) => {
+    console.log('=== DELETE CLICKED (EXPENSE) ===');
+    console.log('Full transaction object:', JSON.stringify(transaction, null, 2));
+    console.log('Transaction ID:', transaction.id);
+    
+    if (transaction && transaction.id) {
+      setTransactionToDelete(transaction);
+      setDeleteDialogOpen(true);
+    } else {
+      console.error('❌ Transaction ID is missing!');
+      toast.error('Cannot delete: Transaction ID is missing');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    console.log('=== DELETE CONFIRM (EXPENSE) ===');
+    console.log('Transaction to delete:', transactionToDelete);
+    console.log('ID being sent:', transactionToDelete?.id);
+    
+    if (transactionToDelete && transactionToDelete.id) {
+      try {
+        await deleteTransaction(transactionToDelete.id);
+        setDeleteDialogOpen(false);
+        setTransactionToDelete(null);
+      } catch (error) {
+        console.error('❌ Error deleting transaction:', error);
+        toast.error('Failed to delete transaction');
+      }
+    } else {
+      console.error('❌ No transaction ID to delete');
+      toast.error('Cannot delete: No transaction ID');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -69,6 +134,14 @@ export default function Expense() {
         </div>
         <TransactionDialog type="expense" />
       </div>
+
+      {editingTransaction && (
+        <TransactionDialog
+          type="expense"
+          transaction={editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+        />
+      )}
 
       {/* Filters */}
       <Card>
@@ -107,24 +180,85 @@ export default function Expense() {
                 <TableHead>Description</TableHead>
                 <TableHead>Payment Method</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {expenseTransactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.category}</TableCell>
-                  <TableCell>{transaction.description}</TableCell>
-                  <TableCell>{transaction.payment_method}</TableCell>
-                  <TableCell className="text-right font-semibold text-destructive">
-                    {formatCurrency(transaction.amount)}
+              {expenseTransactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    No expense transactions found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                expenseTransactions.map((transaction, index) => {
+                  // Debug: Log the transaction to see its structure
+                  if (index === 0) {
+                    console.log('Sample expense transaction object:', transaction);
+                    console.log('Expense transaction keys:', Object.keys(transaction));
+                  }
+                  
+                  return (
+                    <TableRow key={transaction.id || transaction.id || index}>
+                      <TableCell>{transaction.date}</TableCell>
+                      <TableCell>{transaction.category}</TableCell>
+                      <TableCell>{transaction.description || '-'}</TableCell>
+                      <TableCell>{transaction.payment_method}</TableCell>
+                      <TableCell className="text-right font-semibold text-destructive">
+                        {formatCurrency(transaction.amount)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              console.log('Edit clicked for expense:', transaction);
+                              handleEditClick(transaction);
+                            }}
+                            title="Edit"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              console.log('Delete clicked for expense:', transaction);
+                              handleDeleteClick(transaction);
+                            }}
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this expense transaction? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

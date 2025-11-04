@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo } from "react";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/DateRangePicker";
@@ -7,13 +8,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTransactions } from "@/hooks/useTransactions";
 import { TransactionDialog } from "@/components/TransactionDialog";
 import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const incomeCategories = ["Salary", "Freelance", "Investment", "Business", "Other Income"];
 
 export default function Income() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const { transactions, isLoading } = useTransactions();
+  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
+  const { transactions, isLoading, deleteTransaction } = useTransactions();
 
   const incomeTransactions = useMemo(() => {
     let filtered = transactions.filter(t => t.type === 'income');
@@ -32,7 +48,7 @@ export default function Income() {
     }
 
     return filtered;
-  }, [dateRange, selectedCategories]);
+  }, [transactions, dateRange, selectedCategories]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -52,6 +68,38 @@ export default function Income() {
     );
   };
 
+  
+  const handleEditClick = (transaction: any) => {
+    console.log('Editing transaction:', transaction); // Debug log
+    if (transaction && transaction.id) {
+      setEditingTransaction(transaction);
+    } else {
+      console.error('Transaction ID is missing:', transaction);
+    }
+  };
+
+  const handleDeleteClick = (transaction: any) => {
+    console.log('Deleting transaction:', transaction); // Debug log
+    if (transaction && transaction.id) {
+      setTransactionToDelete(transaction);
+      setDeleteDialogOpen(true);
+    } else {
+      console.error('Transaction ID is missing:', transaction);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (transactionToDelete && transactionToDelete.id) {
+      try {
+        await deleteTransaction(transactionToDelete.id);
+        setDeleteDialogOpen(false);
+        setTransactionToDelete(null);
+      } catch (error) {
+        console.error('Error deleting transaction:', error);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -69,6 +117,14 @@ export default function Income() {
         </div>
         <TransactionDialog type="income" />
       </div>
+
+      {editingTransaction && (
+        <TransactionDialog
+          type="income"
+          transaction={editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+        />
+      )}
 
       {/* Filters */}
       <Card>
@@ -107,24 +163,85 @@ export default function Income() {
                 <TableHead>Description</TableHead>
                 <TableHead>Payment Method</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {incomeTransactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.category}</TableCell>
-                  <TableCell>{transaction.description}</TableCell>
-                  <TableCell>{transaction.payment_method}</TableCell>
-                  <TableCell className="text-right font-semibold text-success">
-                    {formatCurrency(transaction.amount)}
+              {incomeTransactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    No income transactions found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                incomeTransactions.map((transaction, index) => {
+                  // Debug: Log the transaction to see its structure
+                  if (index === 0) {
+                    console.log('Sample transaction object:', transaction);
+                    console.log('Transaction keys:', Object.keys(transaction));
+                  }
+                  
+                  return (
+                    <TableRow key={transaction.id || transaction.id || index}>
+                      <TableCell>{transaction.date}</TableCell>
+                      <TableCell>{transaction.category}</TableCell>
+                      <TableCell>{transaction.description || '-'}</TableCell>
+                      <TableCell>{transaction.payment_method}</TableCell>
+                      <TableCell className="text-right font-semibold text-success">
+                        {formatCurrency(transaction.amount)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              console.log('Edit clicked for:', transaction);
+                              handleEditClick(transaction);
+                            }}
+                            title="Edit"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              console.log('Delete clicked for:', transaction);
+                              handleDeleteClick(transaction);
+                            }}
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this income transaction? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
