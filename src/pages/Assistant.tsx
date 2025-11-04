@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Sparkles, User } from "lucide-react";
+import { Send, Sparkles, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { transactions } from "@/data/transactions";
+import { useTransactions } from "@/hooks/useTransactions";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: number;
@@ -14,15 +15,17 @@ interface Message {
 }
 
 export default function Assistant() {
+  const { transactions, isLoading: transactionsLoading } = useTransactions();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! I'm your personal finance assistant. I can analyze your transactions from January to October 2025. Ask me anything about your finances!",
+      text: "Hello! I'm your personal finance assistant. I can analyze your transactions and provide insights. Ask me anything about your finances!",
       sender: 'bot',
       timestamp: new Date(),
     },
   ]);
   const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,8 +42,22 @@ export default function Assistant() {
     }).format(amount);
   };
 
+  const prepareTransactionContext = () => {
+    const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const balance = income - expense;
+    
+    return {
+      totalTransactions: transactions.length,
+      totalIncome: income,
+      totalExpense: expense,
+      balance,
+      recentTransactions: transactions.slice(0, 10)
+    };
+  };
+
   const calculateStats = (filterMonth?: number) => {
-    let filteredTransactions = transactions;
+    let filteredTransactions = [...transactions];
     
     // Filter by month if specified
     if (filterMonth !== undefined) {
@@ -127,6 +144,25 @@ export default function Assistant() {
       'october': 9, 'oktober': 9, 'oct': 9, 'okt': 9,
     };
     return months[monthName.toLowerCase()];
+  };
+
+  const callAI = async (userMessage: string) => {
+    try {
+      const context = prepareTransactionContext();
+      
+      const { data, error } = await supabase.functions.invoke('chat-finance', {
+        body: {
+          message: userMessage,
+          context: context
+        }
+      });
+
+      if (error) throw error;
+      return data.response;
+    } catch (error) {
+      console.error('AI Error:', error);
+      return "I apologize, but I'm having trouble processing your request. Please try again.";
+    }
   };
 
   const getDummyResponse = (userMessage: string): string => {
@@ -269,8 +305,8 @@ export default function Assistant() {
     return "I can help you with questions about your finances (Jan-Oct 2025). Try asking:\n\n• What's my income?\n• Show my expense breakdown\n• What's my balance?\n• What's my highest spending category?\n• Show recent transactions\n• Give me a summary\n• Compare monthly data\n• How much did I spend on [category]?\n• What's my income in [month]?";
   };
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async () => {
+    if (!inputValue.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: messages.length + 1,
@@ -279,25 +315,48 @@ export default function Assistant() {
       timestamp: new Date(),
     };
 
-    setMessages([...messages, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
+    const messageText = inputValue;
     setInputValue("");
+    setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const aiResponse = await callAI(messageText);
+      
       const botResponse: Message = {
         id: messages.length + 2,
-        text: getDummyResponse(inputValue),
+        text: aiResponse,
         sender: 'bot',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botResponse]);
-    }, 500);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: Message = {
+        id: messages.length + 2,
+        text: "Sorry, I encountered an error. Please try again.",
+        sender: 'bot',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isLoading) {
       handleSend();
     }
   };
+
+  if (transactionsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -376,9 +435,14 @@ export default function Assistant() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className="flex-1"
+                disabled={isLoading}
               />
-              <Button onClick={handleSend} size="icon">
-                <Send className="h-4 w-4" />
+              <Button onClick={handleSend} size="icon" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>

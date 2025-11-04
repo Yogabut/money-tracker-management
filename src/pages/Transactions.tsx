@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { transactions } from "@/data/transactions";
+import { useState, useMemo } from "react";
+import { useTransactions } from "@/hooks/useTransactions";
 import { Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 export default function Transactions() {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const { transactions, isLoading } = useTransactions();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -19,26 +20,42 @@ export default function Transactions() {
   };
 
   // Filter transaksi berdasarkan rentang waktu
-  const filteredTransactions = transactions.filter((transaction) => {
-    const tDate = new Date(transaction.date);
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(endDate) : null;
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((transaction) => {
+      const tDate = new Date(transaction.date);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
 
-    if (start && tDate < start) return false;
-    if (end && tDate > end) return false;
-    return true;
-  });
+      if (start && tDate < start) return false;
+      if (end && tDate > end) return false;
+      return true;
+    });
+  }, [transactions, startDate, endDate]);
 
   // Hitung summary
-  const income = filteredTransactions
-    .filter((t) => t.type === "income")
-    .reduce((acc, t) => acc + t.amount, 0);
+  const income = useMemo(() => 
+    filteredTransactions
+      .filter((t) => t.type === "income")
+      .reduce((acc, t) => acc + t.amount, 0),
+    [filteredTransactions]
+  );
 
-  const expense = filteredTransactions
-    .filter((t) => t.type === "expense")
-    .reduce((acc, t) => acc + t.amount, 0);
+  const expense = useMemo(() => 
+    filteredTransactions
+      .filter((t) => t.type === "expense")
+      .reduce((acc, t) => acc + t.amount, 0),
+    [filteredTransactions]
+  );
 
   const balance = income - expense;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
