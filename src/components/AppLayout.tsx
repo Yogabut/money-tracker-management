@@ -6,18 +6,34 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AppLayout() {
   const navigate = useNavigate();
+  const { user: authUser, signOut } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [profile, setProfile] = useState<{ full_name: string } | null>(null);
 
+  useEffect(() => {
+    if (authUser) {
+      supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', authUser.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setProfile(data);
+        });
+    }
+  }, [authUser]);
 
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    initials: "JD"
-  };
+  const userName = profile?.full_name || authUser?.email || "User";
+  const userEmail = authUser?.email || "";
+  const userInitials = profile?.full_name
+    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : userEmail.slice(0, 2).toUpperCase();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,8 +49,9 @@ export function AppLayout() {
     year: 'numeric'
   });
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowLogoutDialog(false);
+    await signOut();
     navigate("/");
   };
 
@@ -52,15 +69,15 @@ export function AppLayout() {
                 <DropdownMenuTrigger className="focus:outline-none">
                   <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                      {user.initials}
+                      {userInitials}
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                      <p className="text-sm font-medium">{userName}</p>
+                      <p className="text-xs text-muted-foreground">{userEmail}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
